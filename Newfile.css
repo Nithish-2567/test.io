@@ -1,0 +1,248 @@
+/* Simple CSS to make the header look like a navigation bar */
+
+header {
+    
+    background-color: black; /* Dark background */
+    color: white;           /* Light text */
+    padding: 10px 20px 10px ;     /* Spacing inside the header */
+    position: fixed;
+    top: 0;
+    font-family:Arial;
+    /* 👈 THE FIX: Explicitly set the width to 100% of the viewport */
+    width: 100%; 
+}
+html {
+    /* This single line enables smooth scrolling for all anchor links */
+    scroll-behavior: smooth;
+    initial-scale:1.25
+}
+#header-iframe {
+    position: fixed; /* Makes it stick to the viewport */
+    top: 0;          /* Aligns it to the very top edge */
+    left: 0;         /* Aligns it to the very left edge */
+    width: 100%;     /* Makes it span the full width of the viewport */
+    height: 60px;    /* Set the height of your header */
+    border: none;    /* Recommended to remove default iframe border */
+    z-index: 1000;   /* Ensures it stays above all other page content */
+}
+/* Target the elements that create default gaps */
+body {
+    /* Removes the default space browsers put around the page content */
+    margin: 0;
+    padding: 0;
+}
+
+/* Target common elements that might be the first thing inside your header */
+h1, h2, h3, p {
+    /* Removes the default top/bottom margin from headings and paragraphs */
+    margin-top: 0;
+    margin-bottom: 0;
+    text-align: center;
+    color:red;
+}
+
+body {
+    margin-top: 80px; /* Adds space above everything on the page */
+       
+}
+header h1 {
+    margin: 0; /* Remove default margin for h1 */
+    font-size: 1.5em;
+    display: inline-block; /* Allows the h1 to sit next to the nav */
+}
+
+nav {
+    display: inline-block; /* Allows the nav to sit next to the h1 */
+    float: right;          /* Pushes the navigation to the right */
+}
+
+nav ul {
+    list-style: none; /* Removes the bullet points */
+    margin: 0;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline; /* Makes the list items appear horizontally */
+    margin-left: 20px;
+}
+
+nav ul li a {
+    color: white; /* Link color */
+    text-decoration: none; /* Removes the underline from links */
+}
+
+nav ul li a:hover {
+    text-decoration:none; /* Underline links on hover */
+}
+.report-grid-container {
+    /* 1. Turns on Grid Layout for the container */
+    display: flex;
+    flex-direction : row;
+    flex-wrap: nowrap;
+    /* 2. Defines two columns of equal fractional (fr) width */
+    grid-template-columns: 1fr 1fr;
+
+    /* 3. Adds space between the columns */
+    gap: 20px;
+}
+
+.report-column {
+    /* Optional: Styling for visual separation */
+    padding: 10px;
+    border: 1px solid #ccc;
+    height: 500px; 
+    flex: 1; /* Shorthand for flex-grow: 1; flex-shrink: 1; flex-basis: 0; */
+    
+    /* Ensure the content inside the column stretches vertically */
+    display: flex;
+    flex-direction: column;
+    
+}
+.padded-box {
+    /* Set padding specifically to the top */
+    padding-top: 10px;
+    padding-right: 10px;
+    /* Optional: other styling to make the padding visible */
+    padding-bottom: 10px; /* Example of padding on the bottom */
+    padding-left: 10px;   /* Example of padding on the left */
+}
+.content-below {
+    /* Just for visual reference */
+    
+    margin-top: 10px;
+    height:100vh;
+}
+select {
+            /* Basic sizing and border */
+            padding: 10px 15px; /* Increased padding */
+            border-radius: 8px; /* Softer rounded corners */
+            border: 2px solid #a5b4fc; /* Initial border color (light indigo) */
+            min-width: 240px; /* Wider control */
+            font-size: 1.1em; /* Larger, more readable font */
+            cursor: pointer;
+            background-color: white;
+            color: #333;
+            
+            /* Remove default arrow (Crucial for custom styling) */
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            
+            /* Box shadow for depth and smooth transitions */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08); 
+            transition: all 0.3s ease; 
+            
+            /* Add custom arrow using a Data URI SVG */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236366f1'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd' /%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 1.2em;
+        }
+
+        /* Styling on hover */
+        select:hover {
+            border-color: #818cf8; /* Darker border on hover */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Styling when the element is focused (tabbed to) */
+        select:focus {
+            outline: none; /* Remove default focus outline */
+            border-color: #4f46e5; /* Vibrant focus color (indigo) */
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.4); /* Custom focus ring */
+        }
+.info-text
+{font-family: 'Inter', sans-serif;
+            background-color: #eef2ff; /* Light blue background */
+        }
+.scrollable-content {
+    /* 1. Set a fixed height for the element */
+    height: 10px; 
+    
+    /* 2. Forces a vertical scrollbar on the right if content exceeds the height */
+    overflow-y: scroll; 
+    
+    /* 3. Optional: Hide the horizontal scrollbar (left/right) */
+    overflow-x: hidden; 
+}
+body {
+    scrollbar-width: none;      /* Firefox */
+    -ms-overflow-style: none;  
+    overflow-x: hidden; /* IE and Edge */
+}
+
+/* 2. Targeting Webkit browsers (Chrome, Safari, new Edge) 
+   Applies to the scrollbar itself, regardless of whether it originates from 
+   the 'html' or 'body' element in the overflow model. 
+*/
+::-webkit-scrollbar {
+    display: none;
+}
+a{
+    text-decoration: none;
+}
+body {
+
+  background-color: white;
+  color: black;
+  
+}
+
+.dark-mode {
+  background-color: black;
+  color: white;
+}
+
+/* 1. The Parent Container */
+.dropdown {
+    /* Required to position the dropdown content relative to this button */
+    position: relative;
+    display: inline-block; /* Allows items to sit side-by-side */
+}
+
+/* 2. The Menu Button (The visible trigger) */
+.dropbtn {
+    background-color: black;
+    color: red;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+/* 3. The Dropdown Content (Hidden by default) */
+.dropdown-content {
+    /* Hide the content initially */
+    display: none;
+    
+    /* Position it directly below the button */
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 280px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1; /* Ensures it appears above other content */
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block; /* Makes each link take the full width */
+}
+
+/* Optional: Change color of dropdown links on hover */
+.dropdown-content a:hover {
+    background-color: #ddd;
+}
+
+/* 4. THE KEY HOVER RULE: Show the content when the parent is hovered */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Optional: Change the background of the button when the dropdown is active */
+.dropdown:hover .dropbtn {
+    background-color: black;
+    color:yellowgreen;
+}
