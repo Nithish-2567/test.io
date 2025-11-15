@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Book Manager</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Expose Firebase functions globally for use in the main script block
+        window.firebase = {
+            initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut,
+            getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs, setLogLevel
+        };
+    </script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-blue': '#3b82f6',
+                        'dark-bg': '#1f2937',
+                        'dark-card': '#374151',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen">
+
+    <header class="bg-gray-800 shadow-xl p-6 text-center mb-6">
+        <h1 class="text-4xl font-extrabold text-primary-blue tracking-wider">
+            My Dynamic Library
+        </h1>
+        <p id="user-display" class="text-sm text-gray-400 mt-1">Authenticating...</p>
+    </header>
+
+    <div class="max-w-4xl mx-auto px-4">
+        
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+            <input type="text" id="author-search" 
+                   placeholder="Search by title, author, or genre..."
+                   class="w-full sm:w-2/3 p-3 bg-gray-700 border border-gray-600 rounded-xl text-gray-100 placeholder-gray-400 focus:border-primary-blue focus:ring-primary-blue transition shadow-inner">
+            
+            <button id="add-book-btn" 
+                    class="w-full sm:w-1/3 p-3 bg-primary-blue text-white font-semibold rounded-xl hover:bg-blue-600 transition duration-200 shadow-md">
+                + Add New Book
+            </button>
+        </div>
+
+        <!-- Book List Container -->
+        <div id="book-list-container" class="space-y-4">
+            <!-- Books will be dynamically rendered here -->
+        </div>
+
+        <!-- Empty State Message -->
+        <p id="empty-state" class="text-center text-gray-500 mt-12 text-lg hidden">
+            Your library is empty. Add a book to get started!
+        </p>
+    </div>
+
+    <!-- Add/Edit Book Modal -->
+    <div id="book-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden items-center justify-center p-4">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-lg transform transition-all scale-100">
+            <h2 id="modal-title" class="text-2xl font-bold mb-4 text-primary-blue">Add New Book</h2>
+            
+            <form id="book-form" class="space-y-4">
+                <input type="hidden" id="book-id">
+                
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-300 mb-1">Title</label>
+                    <input type="text" id="title" required
+                           class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 focus:border-primary-blue focus:ring-primary-blue transition">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="author" class="block text-sm font-medium text-gray-300 mb-1">Author</label>
+                        <input type="text" id="author" required
+                               class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 focus:border-primary-blue focus:ring-primary-blue transition">
+                    </div>
+                    <div>
+                        <label for="published" class="block text-sm font-medium text-gray-300 mb-1">Published Year</label>
+                        <input type="number" id="published" required min="1000" max="2099" 
+                               class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 focus:border-primary-blue focus:ring-primary-blue transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="genre" class="block text-sm font-medium text-gray-300 mb-1">Genre</label>
+                    <input type="text" id="genre" required
+                           class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 focus:border-primary-blue focus:ring-primary-blue transition">
+                </div>
+                
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-300 mb-1">Description</label>
+                    <textarea id="description" rows="3" required
+                              class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 focus:border-primary-blue focus:ring-primary-blue transition"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" id="close-modal-btn" 
+                            class="px-5 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-5 py-2 bg-primary-blue text-white rounded-lg hover:bg-blue-600 transition shadow-lg">
+                        Save Book
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal (for Delete) -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden items-center justify-center p-4">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-sm">
+            <h2 class="text-xl font-bold mb-4 text-red-400">Confirm Deletion</h2>
+            <p class="text-gray-300 mb-6">Are you sure you want to delete this book?</p>
+            <div class="flex justify-end gap-3">
+                <button id="cancel-delete-btn" class="px-5 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition">
+                    Cancel
+                </button>
+                <button id="confirm-delete-btn" data-book-id="" class="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-lg">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-8 py-4 text-center text-gray-500 text-sm">
+        <p>&copy; 2025 Dynamic Library Collection. Data is stored locally in your session (not persistent) until connected to Firestore.</p>
+    </footer>
+
+    <script type="module">
+        
+        // --- Firebase Initialization (Setup for future persistence) ---
+        let app, db, auth, userId = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        if (firebaseConfig) {
+            try {
+                // setLogLevel('debug'); // Uncomment for debugging Firebase issues
+                app = firebase.initializeApp(firebaseConfig);
+                db = firebase.getFirestore(app);
+                auth = firebase.getAuth(app);
+                
+                firebase.onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        document.getElementById('user-display').textContent = `User ID: ${userId} (Authenticated)`;
+                    } else {
+                        // Sign in anonymously if no token is available
+                        try {
+                            if (initialAuthToken) {
+                                await firebase.signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await firebase.signInAnonymously(auth);
+                            }
+                        } catch (e) {
+                            console.error("Authentication failed:", e);
+                            document.getElementById('user-display').textContent = `Authentication Failed.`;
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                document.getElementById('user-display').textContent = `Firebase Init Error. Check console.`;
+            }
+        } else {
+            document.getElementById('user-display').textContent = `Running in non-persistent mode.`;
+        }
+
+        // --- Core Application Data and CRUD (In-memory Fallback) ---
+        
+        // Initial hardcoded data
+        let books = [
+            { id: crypto.randomUUID(), title: 'The Book Thief', author: 'Markus Zusak', genre: 'Historical Fiction', published: 2005, description: 'Narrated by Death, this historical novel follows Liesel Meminger, a foster girl in Nazi Germany who steals books and shares them during the bombings of World War II.', coverUrl: 'https://m.media-amazon.com/images/I/71H52+sSb4L._SY342_.jpg' },
+            { id: crypto.randomUUID(), title: '1984', author: 'George Orwell', genre: 'Dystopian Fiction', published: 1949, description: 'A cautionary tale set in a totalitarian superstate where Winston Smith struggles against total surveillance.', coverUrl: 'https://m.media-amazon.com/images/I/715WdnBHqYL._UF1000,1000_QL80_.jpg' },
+            { id: crypto.randomUUID(), title: 'Dune', author: 'Frank Herbert', genre: 'Science Fiction', published: 1965, description: 'Set on the desert planet Arrakis, a complex epic of human evolution and power.', coverUrl: 'https://padhegaindia.in/wp-content/uploads/2023/07/9780593099322_1.webp' },
+            { id: crypto.randomUUID(), title: 'The Body In The Library', author: 'Agatha Christie', genre: 'Mystery', published: 1942, description: 'A classic Miss Marple mystery beginning with a body found in an unlikely place.', coverUrl: 'https://m.media-amazon.com/images/I/71LVPaqwweL._AC_UF1000,1000_QL80_.jpg' },
+            { id: crypto.randomUUID(), title: 'To Kill a Mockingbird', author: 'Harper Lee', genre: 'Southern Gothic', published: 1960, description: 'A story about the roots of human behavior, courage, and compassion, set in the American South.', coverUrl: 'https://images-na.ssl-images-amazon.com/images/I/71Fx3I1Q9BL.jpg' },
+            { id: crypto.randomUUID(), title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', genre: 'Tragedy', published: 1925, description: 'Chronicles Jay Gatsby\'s pursuit of the American Dream in the Roaring Twenties.', coverUrl: 'https://images-na.ssl-images-amazon.com/images/I/71J1x14e0fL.jpg' },
+            { id: crypto.randomUUID(), title: 'Sapiens: A Brief History of Humankind', author: 'Yuval Noah Harari', genre: 'Non-Fiction', published: 2011, description: 'Explores the history of Homo sapiens, from hunter-gatherers to the present day.', coverUrl: 'https://images-na.ssl-images-amazon.com/images/I/713jFhH0XDL.jpg' },
+            { id: crypto.randomUUID(), title: 'The Hitchhikers Guide to the Galaxy', author: 'Douglas Adams', genre: 'Comedy Science Fiction', published: 1979, description: 'Follows the misadventures of the last surviving human following the Earth\'s destruction.', coverUrl: 'https://images-na.ssl-images-amazon.com/images/I/81O1z1E9GBL.jpg' },
+            { id: crypto.randomUUID(), title: 'Where the Crawdads Sing', author: 'Delia Owens', genre: 'Mystery', published: 2018, description: 'A coming-of-age story and murder mystery set in the North Carolina marshes.', coverUrl: 'https://images-na.ssl-images-amazon.com/images/I/71ZpTf7I8OL.jpg' },
+            { id: crypto.randomUUID(), title: 'Educated: A Memoir', author: 'Tara Westover', genre: 'Memoir', published: 2018, description: 'An unforgettable memoir about a young woman who, kept out of school by her survivalist family, first set foot in a classroom at seventeen.', coverUrl: 'https://images-na.ssl-images-amazon.com/images/I/81jP+1Qy9PL.jpg' },
+        ];
+
+        const bookListContainer = document.getElementById('book-list-container');
+        const emptyState = document.getElementById('empty-state');
+        const bookModal = document.getElementById('book-modal');
+        const bookForm = document.getElementById('book-form');
+        const confirmModal = document.getElementById('confirm-modal');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        
+        // --- Dynamic Rendering Functions ---
+
+        const getPlaceholderUrl = () => 'https://placehold.co/100x150/505050/ffffff?text=No+Cover';
+
+        /**
+         * Creates the HTML structure for a single book item.
+         */
+        function createBookElement(book) {
+            const card = document.createElement('div');
+            card.className = 'book-item flex gap-4 p-4 bg-gray-800 rounded-xl shadow-xl hover:bg-gray-700 transition duration-300 transform hover:-translate-y-1';
+            card.dataset.id = book.id;
+
+            const coverUrl = book.coverUrl || getPlaceholderUrl();
+
+            card.innerHTML = `
+                <img src="${coverUrl}" 
+                     onerror="this.onerror=null; this.src='${getPlaceholderUrl()}';"
+                     alt="${book.title} cover" 
+                     class="w-24 h-36 object-cover rounded-lg flex-shrink-0 shadow-md">
+                
+                <div class="book-details flex-grow">
+                    <h3 class="text-xl font-bold text-primary-blue mb-1">${book.title}</h3>
+                    <p class="text-sm text-gray-400">
+                        <strong class="font-semibold">Author:</strong> <span class="author-text">${book.author}</span>
+                    </p>
+                    <p class="text-sm text-gray-400">
+                        <strong class="font-semibold">Genre:</strong> ${book.genre} | 
+                        <strong class="font-semibold">Published:</strong> ${book.published}
+                    </p>
+                    <p class="text-gray-300 mt-2 text-sm">${book.description}</p>
+
+                    <div class="mt-3 flex gap-3">
+                        <button data-id="${book.id}" class="edit-btn text-sm px-3 py-1 bg-yellow-600 hover:bg-yellow-500 rounded-lg transition font-medium">
+                            Edit
+                        </button>
+                        <button data-id="${book.id}" class="delete-btn text-sm px-3 py-1 bg-red-600 hover:bg-red-500 rounded-lg transition font-medium">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        /**
+         * Renders the entire book list to the UI.
+         */
+        function renderBookList(bookArray = books) {
+            bookListContainer.innerHTML = ''; // Clear existing list
+            
+            if (bookArray.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            bookArray.forEach(book => {
+                bookListContainer.appendChild(createBookElement(book));
+            });
+            
+            // Re-attach listeners for dynamically created buttons
+            attachBookCardListeners();
+        }
+
+        // --- CRUD Logic (In-memory) ---
+
+        /**
+         * Adds a new book or saves an existing one (in-memory).
+         */
+        function saveBook(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('book-id').value;
+            const title = document.getElementById('title').value;
+            const author = document.getElementById('author').value;
+            const genre = document.getElementById('genre').value;
+            const published = parseInt(document.getElementById('published').value, 10);
+            const description = document.getElementById('description').value;
+
+            const newBook = {
+                title, author, genre, published, description,
+                coverUrl: null // We don't have a field for this yet, so it's null
+            };
+
+            if (id) {
+                // Edit existing book
+                const index = books.findIndex(b => b.id === id);
+                if (index !== -1) {
+                    books[index] = { ...books[index], ...newBook };
+                }
+            } else {
+                // Add new book
+                newBook.id = crypto.randomUUID(); // Assign new temporary ID
+                books.push(newBook);
+            }
+
+            // Re-render the list and close the modal
+            renderBookList();
+            bookModal.classList.add('hidden');
+            bookForm.reset(); // Clear the form
+        }
+
+        /**
+         * Deletes a book (in-memory).
+         */
+        function deleteBook(bookId) {
+            books = books.filter(book => book.id !== bookId);
+            renderBookList();
+            confirmModal.classList.add('hidden');
+        }
+
+        // --- Event Listeners and UI Management ---
+
+        /**
+         * Fills the form for editing an existing book.
+         */
+        function openEditModal(bookId) {
+            const book = books.find(b => b.id === bookId);
+            if (!book) return;
+
+            document.getElementById('modal-title').textContent = 'Edit Book';
+            document.getElementById('book-id').value = book.id;
+            document.getElementById('title').value = book.title;
+            document.getElementById('author').value = book.author;
+            document.getElementById('published').value = book.published;
+            document.getElementById('genre').value = book.genre;
+            document.getElementById('description').value = book.description;
+            
+            bookModal.classList.remove('hidden');
+            bookModal.style.display = 'flex';
+        }
+
+        /**
+         * Opens the confirmation modal for deletion.
+         */
+        function openConfirmModal(bookId) {
+            confirmDeleteBtn.dataset.bookId = bookId;
+            confirmModal.classList.remove('hidden');
+            confirmModal.style.display = 'flex';
+        }
+
+        /**
+         * Attaches event listeners to dynamically created book card buttons (Edit/Delete).
+         */
+        function attachBookCardListeners() {
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.onclick = (e) => openConfirmModal(e.currentTarget.dataset.id);
+            });
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.onclick = (e) => openEditModal(e.currentTarget.dataset.id);
+            });
+        }
+        
+        // Modal Event Listeners
+        document.getElementById('add-book-btn').addEventListener('click', () => {
+            document.getElementById('modal-title').textContent = 'Add New Book';
+            bookForm.reset();
+            document.getElementById('book-id').value = ''; // Clear ID for new entry
+            bookModal.classList.remove('hidden');
+            bookModal.style.display = 'flex';
+        });
+
+        document.getElementById('close-modal-btn').addEventListener('click', () => {
+            bookModal.classList.add('hidden');
+        });
+
+        bookForm.addEventListener('submit', saveBook);
+        
+        document.getElementById('cancel-delete-btn').addEventListener('click', () => {
+            confirmModal.classList.add('hidden');
+        });
+
+        confirmDeleteBtn.addEventListener('click', (e) => {
+            const bookId = e.currentTarget.dataset.bookId;
+            if (bookId) {
+                deleteBook(bookId);
+            }
+        });
+
+        // Search Listener
+        document.getElementById('author-search').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            
+            const filteredBooks = books.filter(book => 
+                book.title.toLowerCase().includes(searchTerm) ||
+                book.author.toLowerCase().includes(searchTerm) ||
+                book.genre.toLowerCase().includes(searchTerm)
+            );
+            
+            renderBookList(filteredBooks);
+        });
+
+        // Initial render on load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderBookList();
+        });
+
+    </script>
+</body>
+</html>
