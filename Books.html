@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Book Collection</title>
+    <script>
+	// Get references to the input and all book cards
+const searchInput = document.getElementById('author-search');
+const bookCards = document.querySelectorAll('.book-card');
+
+// Listen for input events on the search field (as the user types)
+searchInput.addEventListener('input', function() {
+    // 1. Get the current search term and convert it to lower case
+    const searchTerm = searchInput.value.toLowerCase();
+
+    // 2. Iterate through each book card
+    bookCards.forEach(card => {
+        // Find the author name element within the current card
+        const authorElement = card.querySelector('.author-name');
+
+        if (authorElement) {
+            // 3. Get the author's name text and convert it to lower case
+            const authorName = authorElement.textContent.toLowerCase();
+
+            // 4. Check if the author's name includes the search term
+            if (authorName.includes(searchTerm)) {
+                // If it includes the term, show the card
+                card.style.display = 'block'; // or 'flex', 'grid', whatever your original display was
+            } else {
+                // If it doesn't include the term, hide the card
+                card.style.display = 'none';
+            }
+        }
+    });
+});
+</script>
+    <style>
+        /* Basic CSS for presentation (optional but recommended) */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+      
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color:white;
+            color: black;font-family:Courier New;
+            margin-bottom: 30px;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+            
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+        }
+        .book-list {
+            list-style: none;
+            padding: 0;
+        }
+        .book-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            display: flex; /* Makes the image and text align nicely */
+            gap: 20px;
+        }
+        .book-item img {
+            /* Adjust image size as needed */
+            height: auto;
+            border-radius: 4px;
+        }
+        .book-details {
+            flex-grow: 1;
+        }
+        .book-details h3 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+     
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>My Little Library</h1>
+    </header>
+    <input type="text" id="author-search" placeholder="Search by author...">
+
+<div id="book-list">
+    <div class="book-card">
+        <h3>Book Title A</h3>
+        <p>Author: <span class="author-name">Jane Doe</span></p>
+    </div>
+
+    <div class="book-card">
+        <h3>Book Title B</h3>
+        <p>Author: <span class="author-name">John Smith</span></p>
+    </div>
+
+    <div class="book-card">
+        <h3>Book Title C</h3>
+        <p>Author: <span class="author-name">Jane Doe</span></p>
+    </div>
+</div>
+    <div class="container">
+
+        <ul class="book-list" style="text">
+
+            <li class="book-item">
+                <img src="https://m.media-amazon.com/images/I/71H52+sSb4L._SY342_.jpg" alt="The Book Thief" width="250px">
+                <div class="book-details">
+                    <h3><a href="book1_details.html" target="_blank">The Book Thief</a></h3>
+                    <p><strong>Author:</strong> Markus Zusak</p>
+                    <p><strong>Genre:</strong> Science Fiction</p>
+                    <p><strong>Published:</strong> 2023</p>
+                    <p>A gripping tale of a programmer who discovers an anomaly in the fabric of the internet.</p>
+                </div>
+            </li>
+
+            <li class="book-item">
+                <img src="https://m.media-amazon.com/images/I/715WdnBHqYL._UF1000,1000_QL80_.jpg" width="220px" alt="1984"></img>
+                <div class="book-details">
+                    <h3><a href="book2_details.html" target="_blank">1984</a></h3>
+                    <p><strong>Author:</strong>George Orwell</p>
+                    <p><strong>Genre:</strong> Mystery</p>
+                    <p><strong>Published:</strong> 2024</p>
+                    <p>An intricate murder mystery set in a decaying Victorian mansion.</p>
+                </div>
+            </li>
+            <li class="book-item">
+                <img src="https://m.media-amazon.com/images/I/61KPPB-34FL._AC_UF1000,1000_QL80_.jpg" alt="Cover of Animal Farm" width="220px" height="400">
+                <div class="book-details">
+                    <h3><a href="book2_details.html" target="_blank">Animal Farm</a></h3>
+                    <p><strong>Author:</strong>George Orwell</p>
+                    <p><strong>Genre:</strong> Mystery</p>
+                    <p><strong>Published:</strong> 2024</p>
+                    <p>An intricate murder mystery set in a decaying Victorian mansion.</p>
+                </div>
+            </li>
+            <li class="book-item">
+                <img src="https://pictures.abebooks.com/isbn/9780241256619-uk.jpg" width="220px" height="30" alt="Frankestien">
+                <div class="book-details">
+                    <h3><a href="book2_details.html" target="_blank">Frankenstien</a></h3>
+                    <p><strong>Author:</strong>Mary Shelly</p>
+                    <p><strong>Genre:</strong> Mystery</p>
+                    <p><strong>Published:</strong> 2024</p>
+                    <p>An intricate murder mystery set in a decaying Victorian mansion.</p>
+                </div>
+            </li>
+            <li class="book-item">
+                <img src="https://m.media-amazon.com/images/I/614kchjRC4L._SY342_.jpg" width="220px" alt="Cosmos">
+                <div class="book-details">
+                    <h3><a href="book2_details.html" target="_blank">Cosmos</a></h3>
+                    <p><strong>Author:</strong>Carl Sagan</p>
+                    <p><strong>Genre:</strong> Mystery</p>
+                    <p><strong>Published:</strong> 2024</p>
+                    <p>An intricate murder mystery set in a decaying Victorian mansion.</p>
+                </div>
+            </li>         
+            <li class="book-item">
+                <img src="https://m.media-amazon.com/images/I/71tvs98+5vL.jpg" width="220px"alt="Frankestien">
+                <div class="book-details">
+                    <h3><a href="book2_details.html" target="_blank">The Adventures of Sherlock Holmes</a></h3>
+                    <p><strong>Author:</strong>Sir Arthur Conan Doyle</p>
+                    <p><strong>Genre:</strong> Mystery</p>
+                    <p><strong>Published:</strong> 2024</p>
+                    <p>An intricate murder mystery set in a decaying Victorian mansion.</p>
+                </div>
+            </li>
+            <li class="book-item">
+                <img src="https://m.media-amazon.com/images/I/91dwtJJDKvL._AC_UF1000,1000_QL80_.jpg" width="220px"  alt="The Case Book Of Sherlock Holmes">
+                <div class="book-details">
+                    <h3><a href="book2_details.html" target="_blank">The Case Book Of Sherlock Holmes</a></h3>
+                    <p><strong>Author:</strong>Sir Arthur Conan Doyle</p>
+                    <p><strong>Genre:</strong> Mystery</p>
+                    <p><strong>Published:</strong> 2024</p>
+                    <p>An intricate murder mystery set in a decaying Victorian mansion.</p>
+                </div>
+            </li>
+            <li class="book-item">
+                <img src="https://m.media-amazon.com/images/I/91saO95VziL.jpg" width="220px"  alt="THE GOD OF SMALL THINGS">
+                <div class="book-details">
+                    <h3><a href="book2_details.html" target="_blank">THE God Of Small Things</a></h3>
+                    <p><strong>Author:</strong>Arundhati Roy</p>
+                    <p><strong>Genre:</strong> Mystery</p>
+                    <p><strong>Published:</strong> 2024</p>
+                    <p>An intricate murder mystery set in a decaying Victorian mansion.</p>
+                </div>
+            </li>
+            <li class="book-item">
+                <img src="https://padhegaindia.in/wp-content/uploads/2023/07/9780593099322_1.webp" width="220px"  alt="Dune">
+                <div class="book-details">
+                    <h3><a href="book2_details.html" target="_blank">Dune</a></h3>
+                    <p><strong>Author:</strong>Frank Herbert</p>
+                    <p><strong>Genre:</strong> Mystery</p>
+                    <p><strong>Published:</strong> 2024</p>
+                    <p>An intricate murder mystery set in a decaying Victorian mansion.</p>
+                </div>
+            </li>
+            
+<li class="book-item">
+                <img src="https://m.media-amazon.com/images/I/91IKm0A+qBL.jpg" width="220px"  alt="Dune Messiah">
+                <div class="book-details">
+                    <h3><a href="book2_details.html" target="_blank">Dune Messiah</a></h3>
+                    <p><strong>Author:</strong>Frank Herbert</p>
+                    <p><strong>Genre:</strong> Mystery</p>
+                    <p><strong>Published:</strong> 2024</p>
+                    <p>An intricate murder mystery set in a decaying Victorian mansion.</p>
+                </div>
+            </li>
+            <li class="book-item">
+                <img src="https://m.media-amazon.com/images/I/91Ea8MTjMsL.jpg" width="220px"  alt="Dune">
+                <div class="book-details">
+                    <h3><a href="book2_details.html" target="_blank">Children of Dune</a></h3>
+                    <p><strong>Author:</strong>Frank Herbert</p>
+                    <p><strong>Genre:</strong> Mystery</p>
+                    <p><strong>Published:</strong> 2024</p>
+                    <p>An intricate murder mystery set in a decaying Victorian mansion.</p>
+                </div>
+            </li>
+            </ul>
+            <li class="book-item">
+                <img src="https://m.media-amazon.com/images/I/71LVPaqwweL._AC_UF1000,1000_QL80_.jpg" width="220px"  alt="The Body In The Library">
+                <div class="book-details">
+                    <h3><a href="book2_details.html" target="_blank">The Body In The Library</a></h3>
+                    <p><strong>Author:</strong>Agatha Christie</p>
+                    <p><strong>Genre:</strong> Mystery</p>
+                    <p><strong>Published:</strong> 2024</p>
+                    <p>An intricate murder mystery set in a decaying Victorian mansion.</p>
+                </div>
+            </li>
+            <li class="book-item">
+                <img src="https://m.media-amazon.com/images/I/71AxTQ1ZIdL._UF1000,1000_QL80_.jpg" width="220px"  alt="Hercule Poirot's Christmas">
+                <div class="book-details">
+                    <h3><a href="book2_details.html" target="_blank">Hercule Poirot's Christmas</a></h3>
+                    <p><strong>Author:</strong>Agatha Christie</p>
+                    <p><strong>Genre:</strong> Mystery</p>
+                    <p><strong>Published:</strong> 2024</p>
+                    <p>An intricate murder mystery set in a decaying Victorian mansion.</p>
+                </div>
+            </li>
+
+            </ul>
+
+
+    </div>
+
+    <footer>
+        <p style="text-align: center; margin-top: 30px; font-size: 0.9em;">&copy; 2025 [Nithish]. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
